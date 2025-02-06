@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: fb-price-scraper
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    depends_on:
+      - cf-scraper
+    networks:
+      - scraper-network
+
+  cf-scraper:
+    image: zfcsoftware/cf-clearance-scraper:latest
+    container_name: cf-scraper
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - browserLimit=20
+      - timeOut=60000
+    networks:
+      - scraper-network
+
+networks:
+  scraper-network:
+    driver: bridge 
