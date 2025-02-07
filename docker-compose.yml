@@ -1,30 +1,38 @@
-version: '3.8'
-
 services:
-  app:
-    build: .
-    container_name: fb-price-scraper
-    environment:
-      - NODE_ENV=production
-    env_file:
-      - .env
-    depends_on:
-      - cf-scraper
-    networks:
-      - scraper-network
+  # 1) Warp-proxy servisi
+  warp-proxy:
+    image: yarmak/warp-proxy
+    container_name: warp-proxy
+    restart: always
+    ports:
+      - "40000:40000"
 
+  # 2) cf-scraper servisi
   cf-scraper:
     image: zfcsoftware/cf-clearance-scraper:latest
     container_name: cf-scraper
-    ports:
-      - "3000:3000"
     environment:
       - PORT=3000
       - browserLimit=20
       - timeOut=60000
-    networks:
-      - scraper-network
+      # cf-scraper'ın dış dünyaya giden istekleri warp-proxy üzerinden yapması için proxy ayarları
+      - HTTP_PROXY=http://warp-proxy:40000
+      - HTTPS_PROXY=http://warp-proxy:40000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - warp-proxy
 
-networks:
-  scraper-network:
-    driver: bridge 
+  # 3) Node.js uygulaması servisi
+  node-app:
+    build: .
+    container_name: node-app
+    environment:
+      # Node.js uygulamasının dış dünyaya giden isteklerini proxy üzerinden yönlendirmek isterseniz
+      - HTTP_PROXY=http://warp-proxy:40000
+      - HTTPS_PROXY=http://warp-proxy:40000
+    ports:
+      - "8080:3000"
+    depends_on:
+      - cf-scraper
+      - warp-proxy
