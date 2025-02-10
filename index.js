@@ -40,7 +40,10 @@ async function scrapePlayers() {
                 url,
                 mode: "waf-session",
               }),
-            }).then((res) => res.json());
+            }).then(
+              (res) => res.json(),
+              console.log("Session request response: ", body)
+            );
 
             // Başarılı yanıt alınmış mı?
             if (session && session.code === 200) {
@@ -125,9 +128,7 @@ async function scrapePlayers() {
           const $cardWrapper = $(cardWrapper);
           const dataId = $cardWrapper.attr("data-id");
 
-          const $playerImg = $cardWrapper
-            .find('img[src*="/players/"]')
-            .first();
+          const $playerImg = $cardWrapper.find('img[src*="/players/"]').first();
 
           if ($playerImg.length > 0) {
             const imgSrc = $playerImg.attr("src");
@@ -146,14 +147,14 @@ async function scrapePlayers() {
               );
             }
           } else {
-            console.log(
-              `Uyarı: ${dataId} data-id'li kartta resim bulunamadı`
-            );
+            console.log(`Uyarı: ${dataId} data-id'li kartta resim bulunamadı`);
           }
         });
 
         for (const [dataId, playerExternalId] of Object.entries(playerCards)) {
-          console.log(`\n${playerExternalId} ID'li kart için fiyat verileri toplanıyor...`);
+          console.log(
+            `\n${playerExternalId} ID'li kart için fiyat verileri toplanıyor...`
+          );
 
           const priceData = {
             PlayerExternalId: playerExternalId,
@@ -174,7 +175,8 @@ async function scrapePlayers() {
           $(`.player-header-prices-section [data-id="${dataId}"]`).each(
             (_, priceBlock) => {
               const $block = $(priceBlock);
-              const isPCBlock = $block.find('img[srcset*="pc_blue"]').length > 0;
+              const isPCBlock =
+                $block.find('img[srcset*="pc_blue"]').length > 0;
               const prefix = isPCBlock ? "PC" : "Console";
 
               console.log(`Fiyat bloğu işleniyor (${prefix})`);
@@ -243,7 +245,9 @@ async function scrapePlayers() {
 
         if (results.Data.length > 0) {
           try {
-            console.log(`\nToplam ${results.Data.length} kartın verileri API'ye gönderiliyor...`);
+            console.log(
+              `\nToplam ${results.Data.length} kartın verileri API'ye gönderiliyor...`
+            );
             console.log(results);
 
             const apiResponse = await axios.post(
