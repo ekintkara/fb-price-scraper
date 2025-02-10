@@ -42,7 +42,10 @@ async function scrapePlayers() {
               }),
             }).then(
               (res) => res.json(),
-              console.log("Session request response: ", body)
+              console.log("Session request response: ", JSON.stringify({
+                url,
+                mode: "waf-session",
+              }))
             );
 
             // Başarılı yanıt alınmış mı?
